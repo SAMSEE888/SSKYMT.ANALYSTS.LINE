@@ -1,0 +1,2347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charsetarset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SSKYMT Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+</script>
+<style>
+/* ══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Ultra Dark Precision
+══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  /* Core Palette */
+  --bg-base:   #060810;
+  --bg-1:      #0d1018;
+  --bg-2:      #131720;
+  --bg-3:      #181d28;
+  --bg-4:      #1e2333;
+  --bg-5:      #252c3f;
+
+  /* Borders */
+  --b1: rgba(255,255,255,.06);
+  --b2: rgba(255,255,255,.10);
+  --b3: rgba(255,255,255,.15);
+
+  /* Brand */
+  --blue:   #4d8bff;
+  --blue2:  #7b6cff;
+  --cyan:   #22d3ee;
+  --green:  #10d98a;
+  --red:    #ff3d5a;
+  --amber:  #f59e0b;
+  --purple: #a855f7;
+
+  /* Text */
+  --t0: #f4f6fc;
+  --t1: #9ba3be;
+  --t2: #525978;
+
+  /* Misc */
+  --r:  8px;
+  --r2: 14px;
+  --r3: 20px;
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.5);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,.6);
+
+  --fh: 'Outfit', sans-serif;
+  --fm: 'JetBrains Mono', monospace;
+  --ease: cubic-bezier(.4,0,.2,1);
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg-base);color:var(--t0);
+  font-family:var(--fm);font-size:13px;min-height:100vh;overflow-x:hidden;
+}
+button{cursor:pointer;font-family:inherit;border:none;outline:none;background:none}
+input,select{font-family:inherit;outline:none;color:var(--t0)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b3);border-radius:99px}
+
+/* ── Layout ─────────────────────────────────────────────────── */
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:var(--bg-1);border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;
+  padding:0;overflow:hidden;transition:width .3s var(--ease);
+  position:relative;z-index:50;
+}
+.sidebar-logo{
+  padding:20px 20px 16px;
+  border-bottom:1px solid var(--b1);
+  position:relative;
+}
+.sidebar-close-btn{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:rgba(255,255,255,.1);
+  color:var(--t1);
+  font-size:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all .2s;
+  border:none;
+}
+.sidebar-close-btn:hover{
+  background:rgba(255,61,90,.3);
+  color:var(--red);
+}
+.logo-mark{
+  font-family:var(--fh);font-size:18px;font-weight:800;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  display:block;
+}
+.logo-sub{font-size:10px;color:var(--t2);letter-spacing:.5px;margin-top:2px}
+
+.sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-group{margin-bottom:20px}
+.nav-label{font-size:9px;letter-spacing:1px;color:var(--t2);text-transform:uppercase;
+  padding:0 10px;margin-bottom:6px}
+
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:var(--r);
+  color:var(--t1);font-size:12px;font-weight:500;font-family:var(--fh);
+  cursor:pointer;transition:all .18s var(--ease);margin-bottom:2px;
+  user-select:none;
+}
+.nav-item:hover{background:var(--bg-3);color:var(--t0)}
+.nav-item.active{background:rgba(77,139,255,.12);color:var(--blue);
+  border:1px solid rgba(77,139,255,.2)}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--blue);color:#fff;
+  font-size:9px;padding:2px 6px;border-radius:99px;font-family:var(--fh)}
+
+.sidebar-footer{
+  padding:14px 16px;border-top:1px solid var(--b1);
+}
+.status-row{display:flex;align-items:center;gap:8px}
+.dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.status-txt{font-size:10px;color:var(--t2)}
+.last-sync{font-size:10px;color:var(--t2);margin-top:4px}
+
+/* ── Main Area ───────────────────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── Topbar ──────────────────────────────────────────────────── */
+.topbar{
+  height:52px;background:var(--bg-1);border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;
+}
+.topbar-title{font-family:var(--fh);font-size:15px;font-weight:700;color:var(--t0)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* ── Content ─────────────────────────────────────────────────── */
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* ── Panels ──────────────────────────────────────────────────── */
+.panel{display:none}
+.panel.active{display:block;animation:up .3s var(--ease)}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:var(--r);
+  font-family:var(--fh);font-size:12px;font-weight:600;
+  transition:all .18s var(--ease);letter-spacing:.2px;
+}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#6ba3ff;transform:translateY(-1px);box-shadow:0 4px 16px rgba(77,139,255,.35)}
+.btn-success{background:var(--green);color:#062416}
+.btn-success:hover{background:#20e899;transform:translateY(-1px)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:#ff6077}
+.btn-ghost{background:transparent;color:var(--t1);border:1px solid var(--b2)}
+.btn-ghost:hover{border-color:var(--b3);background:var(--bg-3);color:var(--t0)}
+.btn-sm{padding:6px 12px;font-size:11px}
+.btn-xs{padding:4px 8px;font-size:10px}
+.btn-icon{padding:6px;line-height:1;font-size:14px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+
+/* ── Cards ───────────────────────────────────────────────────── */
+.card{
+  background:var(--bg-2);border:1px solid var(--b1);
+  border-radius:var(--r2);padding:18px;transition:border-color .2s;
+}
+.card:hover{border-color:var(--b2)}
+
+/* ── Section Header ──────────────────────────────────────────── */
+.sec-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.sec-title{
+  font-family:var(--fh);font-size:14px;font-weight:700;
+  display:flex;align-items:center;gap:8px;
+}
+.sec-sub{font-size:11px;color:var(--t2);font-weight:400;margin-left:6px}
+
+/* ── Filter Bar ──────────────────────────────────────────────── */
+.filter-bar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  background:var(--bg-2);border:1px solid var(--b1);
+  border-radius:var(--r2);padding:12px 16px;margin-bottom:20px;
+}
+.filter-label{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.fsel{
+  background:var(--bg-3);border:1px solid var(--b1);border-radius:var(--r);
+  padding:6px 10px;font-size:12px;color:var(--t0);transition:all .18s;cursor:pointer;
+}
+.fsel:focus,.fsel:hover{border-color:var(--b3)}
+.fsep{width:1px;height:18px;background:var(--b1);flex-shrink:0}
+.custom-range{display:flex;align-items:center;gap:6px}
+
+/* ── Insights Filter Bar ─────────────────────────────────────── */
+.insights-filter-bar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  background:var(--bg-2);border:1px solid var(--b1);
+  border-radius:var(--r2);padding:12px 16px;margin-bottom:16px;
+}
+
+/* ── KPI Grid ────────────────────────────────────────────────── */
+.kpi-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));
+  gap:12px;margin-bottom:20px;
+}
+.kpi{
+  background:var(--bg-2);border:1px solid var(--b1);border-radius:var(--r2);
+  padding:16px 18px;position:relative;overflow:hidden;
+  transition:all .2s var(--ease);cursor:default;
+}
+.kpi::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--kc1,transparent),var(--kc2,transparent));
+  opacity:.04;pointer-events:none;border-radius:inherit;
+}
+.kpi:hover{transform:translateY(-2px);border-color:var(--b2);box-shadow:var(--shadow-lg)}
+.kpi-stripe{position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--kc1),var(--kc2))}
+.kpi-icon{font-size:18px;margin-bottom:6px;display:block}
+.kpi-label{font-size:10px;color:var(--t2);letter-spacing:.4px;text-transform:uppercase;margin-bottom:3px}
+.kpi-value{font-family:var(--fh);font-size:20px;font-weight:800;line-height:1;color:var(--t0)}
+.kpi-sub{font-size:10px;color:var(--t2);margin-top:4px}
+.kpi-trend{
+  position:absolute;top:14px;right:14px;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;
+  font-family:var(--fh);
+}
+.tr-up{background:rgba(16,217,138,.12);color:var(--green)}
+.tr-dn{background:rgba(255,61,90,.12);color:var(--red)}
+.tr-fl{background:rgba(82,89,120,.2);color:var(--t2)}
+
+/* ── Day Stats ───────────────────────────────────────────────── */
+.day-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:8px;margin-bottom:20px;
+}
+.day-card{
+  background:var(--bg-2);border:1px solid var(--b1);border-radius:var(--r);
+  padding:10px 8px;text-align:center;transition:all .2s;
+}
+.day-card:hover{border-color:var(--b2);transform:translateY(-2px)}
+.day-card.best{border-color:rgba(16,217,138,.3);background:rgba(16,217,138,.04)}
+.day-card.worst{border-color:rgba(255,61,90,.25);background:rgba(255,61,90,.04)}
+.day-name{font-family:var(--fh);font-size:10px;font-weight:700;color:var(--t2);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.day-val{font-family:var(--fh);font-size:15px;font-weight:700;color:var(--t0)}
+.day-sub{font-size:10px;color:var(--t2);margin-top:2px}
+.day-rev{font-size:11px;color:var(--blue);margin-top:3px;font-weight:600}
+
+/* ── Charts ──────────────────────────────────────────────────── */
+.chart-grid-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-card{background:var(--bg-2);border:1px solid var(--b1);border-radius:var(--r2);padding:18px}
+.chart-title{
+  font-family:var(--fh);font-size:13px;font-weight:700;
+  display:flex;align-items:center;gap:7px;margin-bottom:14px;color:var(--t0)
+}
+.cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.chart-wrap{position:relative;height:220px}
+
+/* ── Insights ────────────────────────────────────────────────── */
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:20px}
+.ins-card{
+  background:var(--bg-2);border-radius:var(--r2);padding:14px 16px;
+  border-left:3px solid;display:flex;gap:10px;transition:all .2s;
+}
+.ins-card:hover{transform:translateX(4px)}
+.ins-card.pos{border-color:var(--green);background:rgba(16,217,138,.03)}
+.ins-card.warn{border-color:var(--amber);background:rgba(245,158,11,.03)}
+.ins-card.neg{border-color:var(--red);background:rgba(255,61,90,.03)}
+.ins-card.info{border-color:var(--blue);background:rgba(77,139,255,.03)}
+.ins-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.ins-title{font-family:var(--fh);font-size:12px;font-weight:700;margin-bottom:4px}
+.ins-body{font-size:11px;color:var(--t1);line-height:1.55}
+
+/* ── Detail Tabs (inside dashboard) ─────────────────────────── */
+.detail-tabs{display:flex;gap:4px;margin-bottom:14px;
+  border-bottom:1px solid var(--b1);padding-bottom:0}
+.dtab{
+  padding:8px 14px;font-family:var(--fh);font-size:11px;font-weight:600;
+  color:var(--t2);border-radius:var(--r) var(--r) 0 0;
+  border:1px solid transparent;border-bottom:none;cursor:pointer;
+  transition:all .18s;position:relative;top:1px;
+}
+.dtab:hover{color:var(--t1);background:var(--bg-3)}
+.dtab.active{color:var(--blue);background:var(--bg-base);border-color:var(--b1);border-bottom-color:var(--bg-base)}
+.dtab-panel{display:none}
+.dtab-panel.active{display:block;animation:up .25s var(--ease)}
+
+/* ── Tables ──────────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--b1)}
+table{width:100%;border-collapse:collapse}
+thead th{
+  background:var(--bg-3);padding:9px 12px;
+  font-family:var(--fh);font-size:10px;font-weight:700;color:var(--t2);
+  letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--b1);
+  white-space:nowrap;
+}
+thead th.sort{cursor:pointer;user-select:none}
+thead th.sort:hover{color:var(--blue)}
+tbody td{
+  padding:9px 12px;border-bottom:1px solid var(--b1);
+  color:var(--t1);white-space:nowrap;transition:all .15s;
+}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,.025);color:var(--t0)}
+.tbl-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+.search-inp{
+  background:var(--bg-3);border:1px solid var(--b1);border-radius:var(--r);
+  padding:7px 12px;font-size:12px;color:var(--t0);width:200px;transition:all .2s;
+}
+.search-inp:focus{border-color:var(--b3);width:240px}
+.pagi{display:flex;align-items:center;gap:5px;margin-top:12px;justify-content:flex-end;flex-wrap:wrap}
+.pagi-btn{
+  background:var(--bg-3);border:1px solid var(--b1);border-radius:6px;
+  padding:5px 9px;font-size:11px;color:var(--t1);transition:all .15s;font-family:var(--fh);
+}
+.pagi-btn:hover,.pagi-btn.act{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pagi-info{font-size:10px;color:var(--t2)}
+
+/* ── Form ────────────────────────────────────────────────────── */
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fgroup{display:flex;flex-direction:column;gap:5px}
+.fgroup label{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.4px}
+.finp{
+  background:var(--bg-3);border:1px solid var(--b1);border-radius:var(--r);
+  padding:9px 12px;color:var(--t0);font-size:13px;transition:all .18s;
+}
+.finp:focus{border-color:var(--blue);background:var(--bg-4)}
+.finp:hover{border-color:var(--b2)}
+.fspan{grid-column:1/-1}
+.calc-preview{
+  background:var(--bg-3);border:1px solid var(--b1);border-radius:var(--r);
+  padding:12px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
+}
+.cpitem .cplabel{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.cpitem .cpval{font-family:var(--fh);font-size:17px;font-weight:800}
+.cpval.rev{color:var(--green)}.cpval.exp{color:var(--red)}.cpval.bal{color:var(--blue)}
+
+/* ── Modal ───────────────────────────────────────────────────── */
+.modal-bg{position:fixed;inset:0;background:rgba(6,8,16,.85);z-index:200;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.modal-bg.open{display:flex;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--bg-2);border:1px solid var(--b2);border-radius:var(--r3);
+  padding:24px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;
+  animation:slideUp .28s var(--ease);
+}
+@keyframes slideUp{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-title{font-family:var(--fh);font-size:15px;font-weight:800}
+
+/* ── Generate Report Banner ──────────────────────────────────── */
+.report-banner{
+  background:linear-gradient(135deg,rgba(77,139,255,.1),rgba(123,108,255,.1));
+  border:1px solid rgba(77,139,255,.2);border-radius:var(--r2);
+  padding:18px 20px;margin-bottom:20px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;
+}
+.report-banner-text .rb-title{font-family:var(--fh);font-size:14px;font-weight:700;margin-bottom:4px}
+.report-banner-text .rb-sub{font-size:11px;color:var(--t1)}
+
+/* ── Line Config Section ─────────────────────────────────────── */
+.line-config-section{
+  background:var(--bg-2);border:1px solid var(--b1);
+  border-radius:var(--r2);padding:18px;margin-bottom:20px;
+}
+.line-config-title{
+  font-family:var(--fh);font-size:14px;font-weight:700;
+  color:var(--green);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+
+/* ── Loading ─────────────────────────────────────────────────── */
+.loading-ov{
+  position:fixed;inset:0;background:rgba(6,8,16,.88);
+  display:none;align-items:center;justify-content:center;
+  z-index:9999;backdrop-filter:blur(5px);flex-direction:column;gap:14px;
+}
+.loading-ov.show{display:flex}
+.spin{
+  width:38px;height:38px;border:3px solid var(--b2);
+  border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-family:var(--fh);font-size:13px;color:var(--t1)}
+
+/* ── Toast ───────────────────────────────────────────────────── */
+#toast{
+  position:fixed;bottom:20px;right:20px;z-index:9999;
+  padding:10px 18px;border-radius:var(--r);font-family:var(--fh);
+  font-size:12px;font-weight:600;opacity:0;pointer-events:none;
+  transform:translateY(8px);transition:all .22s var(--ease);
+}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.ok{background:var(--green);color:#052e18}
+#toast.err{background:var(--red);color:#fff}
+#toast.info{background:var(--blue);color:#fff}
+
+/* ── Text utilities ──────────────────────────────────────────── */
+.t-green{color:var(--green)}.t-red{color:var(--red)}.t-blue{color:var(--blue)}
+.t-amber{color:var(--amber)}.t-muted{color:var(--t2)}.t-bold{font-weight:700}
+.t-hd{font-family:var(--fh)}.t-sm{font-size:11px}.ml-auto{margin-left:auto}
+.flex{display:flex}.ic{align-items:center}.gap2{gap:8px}.gap3{gap:12px}
+.mt2{margin-top:8px}.mt3{margin-top:14px}.w100{width:100%}.hidden{display:none!important}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media(max-width:1100px){
+  .chart-grid-2{grid-template-columns:1fr}
+  .chart-grid-3{grid-template-columns:1fr 1fr}
+  .day-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:760px){
+  .sidebar{width:0;position:absolute;height:100%;overflow:hidden}
+  .sidebar.open{width:220px;box-shadow:var(--shadow-xl)}
+  .sidebar-close-btn{display:flex}
+  .main{width:100%}
+  .chart-grid-2,.chart-grid-3{grid-template-columns:1fr}
+  .day-grid{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .form-2col{grid-template-columns:1fr}
+  .content{padding:12px}
+  .topbar{padding:0 12px}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr}
+  .day-grid{grid-template-columns:1fr 1fr}
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* COMMAND EXECUTOR STYLES */
+/* ═══════════════════════════════════════════════════ */
+.command-section {
+  margin-top: 2rem;
+  background: var(--card-bg, #1a2744);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color, #1e293b);
+}
+
+.command-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.command-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.cmd-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 10px;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.cmd-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+}
+
+.cmd-btn .emoji {
+  font-size: 1.25rem;
+}
+
+.cmd-search {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.cmd-search input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: #0f1724;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.cmd-search input:focus {
+  border-color: #3b82f6;
+}
+
+.cmd-execute-btn {
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.cmd-execute-btn:hover {
+  background: #2563eb;
+}
+
+.cmd-result {
+  background: #0a0f1a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid #1e293b;
+}
+
+.cmd-result .empty {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+/* Command Categories */
+.cmd-categories {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.cmd-category {
+  padding: 0.5rem 1rem;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.cmd-category:hover,
+.cmd-category.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #1a2744;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #3b82f6;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  z-index: 9999;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ─── SIDEBAR ─────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-close-btn" id="sidebarCloseBtn" onclick="closeSidebar()" title="ปิดเมนู">✕</button>
+  <div class="sidebar-logo">
+    <span class="logo-mark">⚡ SSKRATOMYMT </span>
+    <div class="logo-sub">SALESANALYTICS</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <div class="nav-item active" onclick="nav('dashboard',this)" id="nav-dashboard">
+        <span class="nav-icon">📊</span><span>Dashboard</span>
+      </div>
+      <div class="nav-item" onclick="nav('form',this)" id="nav-form">
+        <span class="nav-icon">📝</span><span>บันทึกข้อมูล</span>
+      </div>
+      <div class="nav-item" onclick="nav('history',this)" id="nav-history">
+        <span class="nav-icon">📋</span><span>ประวัติ</span>
+        <span class="nav-badge" id="histBadge">0</span>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Analytics</div>
+      <div class="nav-item" onclick="nav('insights',this)" id="nav-insights">
+        <span class="nav-icon">🧠</span><span>Insights</span>
+      </div>
+      <div class="nav-item" onclick="nav('report',this)" id="nav-report">
+        <span class="nav-icon">📑</span><span>สร้าง Report</span>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Notifications</div>
+      <div class="nav-item" onclick="nav('lineconfig',this)" id="nav-lineconfig">
+        <span class="nav-icon">💬</span><span>Line OA</span>
+      </div>
+      <div class="nav-item" onclick="nav('commands',this)" id="nav-commands">
+  <span class="nav-icon">🤖</span><span>Commands</span>
+</div>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="status-row">
+      <span class="dot-live"></span>
+      <span class="status-txt">Live Connected</span>
+    </div>
+    <div class="last-sync" id="lastSync">—</div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ──────────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="btn btn-ghost btn-icon" onclick="toggleSidebar()" style="display:none" id="menuBtn">☰</button>
+    <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <div class="topbar-right">
+      <button class="btn btn-ghost btn-sm" onclick="refreshAll()">↻ รีเฟรช</button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- PANEL: DASHBOARD -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="panel active" id="panel-dashboard">
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <span class="filter-label">ช่วงเวลา</span>
+        <select class="fsel" id="filterPreset" onchange="onFilter()">
+          <option value="all">ทั้งหมด</option>
+          <option value="today">วันนี้</option>
+          <option value="week" selected>สัปดาห์นี้</option>
+          <option value="month">เดือนนี้</option>
+          <option value="custom">กำหนดเอง</option>
+        </select>
+        <select class="fsel hidden" id="filterMonth" onchange="onFilter()"></select>
+        <select class="fsel hidden" id="filterYear"  onchange="onFilter()"></select>
+        <div class="custom-range hidden" id="customRange">
+          <span class="filter-label">จาก</span>
+          <input type="date" class="fsel" id="dateFrom" onchange="onFilter()"/>
+          <span class="filter-label">ถึง</span>
+          <input type="date" class="fsel" id="dateTo" onchange="onFilter()"/>
+        </div>
+        <div class="fsep"></div>
+        <span class="t-muted t-sm" id="filterInfo">— รายการ</span>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <!-- Day Stats -->
+      <div class="sec-hdr">
+        <div class="sec-title">📅 วิเคราะห์รายวัน <span class="sec-sub">จันทร์–อาทิตย์</span></div>
+      </div>
+      <div class="day-grid" id="dayGrid"></div>
+
+      <!-- Charts Row 1 -->
+      <div class="chart-grid-2">
+        <div class="chart-card">
+          <div class="chart-title"><span class="cdot" style="background:var(--blue)"></span>Revenue vs Expense vs Balance</div>
+          <div class="chart-wrap"><canvas id="cRevExp"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="cdot" style="background:var(--amber)"></span>Expense Breakdown</div>
+          <div class="chart-wrap"><canvas id="cPie"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2 -->
+      <div class="chart-grid-3">
+        <div class="chart-card">
+          <div class="chart-title"><span class="cdot" style="background:var(--green)"></span>Sales Performance</div>
+          <div class="chart-wrap"><canvas id="cSales"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="cdot" style="background:var(--purple)"></span>Profit Margin %</div>
+          <div class="chart-wrap"><canvas id="cMargin"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span class="cdot" style="background:var(--cyan)"></span>KPI Balance Trend</div>
+          <div class="chart-wrap"><canvas id="cKpi"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="card">
+        <div class="tbl-toolbar">
+          <input type="text" class="search-inp" id="tSearch" placeholder="🔍 ค้นหา..." oninput="renderTable()"/>
+          <div class="ml-auto flex ic gap2">
+            <button class="btn btn-ghost btn-sm" onclick="exportCSV()">↓ CSV</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportJSON()">↓ JSON</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportJPEG()">↓ JPEG</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table id="mainTable">
+            <thead>
+              <tr>
+                <th class="sort" onclick="sortBy('date')">วันที่ ⇅</th>
+                <th class="sort" onclick="sortBy('sold')">Sold ⇅</th>
+                <th class="sort" onclick="sortBy('pending')">Pending ⇅</th>
+                <th class="sort" onclick="sortBy('cleared')">Cleared ⇅</th>
+                <th class="sort" onclick="sortBy('revenue')">Revenue ⇅</th>
+                <th class="sort" onclick="sortBy('expense')">Expense ⇅</th>
+                <th class="sort" onclick="sortBy('balance')">Balance ⇅</th>
+                <th>Margin</th>
+              </tr>
+            </thead>
+            <tbody id="mainTbody"></tbody>
+          </table>
+        </div>
+        <div class="pagi" id="pagi"></div>
+      </div>
+    </div><!-- /panel-dashboard -->
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- PANEL: FORM -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="panel" id="panel-form">
+      <div class="sec-title" style="margin-bottom:16px">📝 บันทึกข้อมูลการขาย</div>
+      <div class="card" style="max-width:660px">
+        <div class="form-2col">
+          <div class="fgroup">
+            <label>วันที่ *</label>
+            <input type="date" class="finp" id="f_date" required/>
+          </div>
+          <div class="fgroup">
+            <label>ขายได้ (Sold)</label>
+            <input type="number" class="finp" id="f_sold" placeholder="0" min="0" oninput="calcPrev()"/>
+          </div>
+          <div class="fgroup">
+            <label>รอชำระ (Pending)</label>
+            <input type="number" class="finp" id="f_pending" placeholder="0" min="0" oninput="calcPrev()"/>
+          </div>
+          <div class="fgroup">
+            <label>ชำระแล้ว (Cleared)</label>
+            <input type="number" class="finp" id="f_cleared" placeholder="0" min="0" oninput="calcPrev()"/>
+          </div>
+          <div class="fgroup">
+            <label>Pipeline Fee (฿)</label>
+            <input type="number" class="finp" id="f_pipe" placeholder="0" min="0" oninput="calcPrev()"/>
+          </div>
+          <div class="fgroup">
+            <label>Share Fee (฿)</label>
+            <input type="number" class="finp" id="f_share" placeholder="0" min="0" oninput="calcPrev()"/>
+          </div>
+          <div class="fgroup">
+            <label>Other Fee (฿)</label>
+            <input type="number" class="finp" id="f_other" placeholder="0" min="0" oninput="calcPrev()"/>
+          </div>
+          <div class="fgroup">
+            <label>Save Fee (฿)</label>
+            <input type="number" class="finp" id="f_save" placeholder="0" min="0" oninput="calcPrev()"/>
+          </div>
+
+          <div class="fgroup fspan">
+            <label>Preview การคำนวณ</label>
+            <div class="calc-preview">
+              <div class="cpitem"><div class="cplabel">Revenue</div><div class="cpval rev" id="p_rev">฿0</div></div>
+              <div class="cpitem"><div class="cplabel">Expense</div><div class="cpval exp" id="p_exp">฿0</div></div>
+              <div class="cpitem"><div class="cplabel">Balance</div><div class="cpval bal" id="p_bal">฿0</div></div>
+            </div>
+          </div>
+
+          <div class="fspan flex gap2">
+            <button class="btn btn-primary" onclick="submitForm()">💾 บันทึก</button>
+            <button class="btn btn-ghost" onclick="clearForm()">✕ ล้าง</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- PANEL: HISTORY -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+<!-- PANEL: HISTORY -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-history">
+  <div class="sec-hdr">
+    <div class="sec-title">📋 ประวัติการบันทึก <span class="sec-sub" id="historyCount">0 รายการทั้งหมด</span></div>
+    <button class="btn btn-ghost btn-sm" onclick="renderHistory(true)">↻ รีเฟรช</button>
+  </div>
+  <div class="card">
+    <div class="tbl-toolbar">
+      <input type="text" class="search-inp" id="historySearch" placeholder="🔍 ค้นหาประวัติ..." oninput="searchHistory()" style="width:200px"/>
+      <div class="ml-auto flex ic gap2">
+        <span class="t-muted t-sm">จัดเรียง: ใหม่ล่าสุด</span>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>วันที่</th>
+            <th>Sold</th>
+            <th>Pending</th>
+            <th>Cleared</th>
+            <th>Revenue</th>
+            <th>Expense</th>
+            <th>Balance</th>
+            <th>Timestamp</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="histBody"></tbody>
+      </table>
+    </div>
+    <div id="historyPagi" style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px;"></div>
+  </div>
+</div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- PANEL: INSIGHTS (with filter) -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="panel" id="panel-insights">
+      <div class="sec-title" style="margin-bottom:12px">🧠 Business Insights & Analytics</div>
+
+      <!-- Insights Filter Bar -->
+      <div class="insights-filter-bar">
+        <span class="filter-label">🔍 ฟิลเตอร์ Insights</span>
+        <div class="fsep"></div>
+        <span class="filter-label">จาก</span>
+        <input type="date" class="fsel" id="ins_dateFrom" onchange="onInsightsFilter()"/>
+        <span class="filter-label">ถึง</span>
+        <input type="date" class="fsel" id="ins_dateTo" onchange="onInsightsFilter()"/>
+        <div class="fsep"></div>
+        <span class="filter-label">เดือน</span>
+        <select class="fsel" id="ins_month" onchange="onInsightsFilter()">
+          <option value="">ทั้งหมด</option>
+          <option value="1">มกราคม</option>
+          <option value="2">กุมภาพันธ์</option>
+          <option value="3">มีนาคม</option>
+          <option value="4">เมษายน</option>
+          <option value="5">พฤษภาคม</option>
+          <option value="6">มิถุนายน</option>
+          <option value="7">กรกฎาคม</option>
+          <option value="8">สิงหาคม</option>
+          <option value="9">กันยายน</option>
+          <option value="10">ตุลาคม</option>
+          <option value="11">พฤศจิกายน</option>
+          <option value="12">ธันวาคม</option>
+        </select>
+        <span class="filter-label">ปี</span>
+        <select class="fsel" id="ins_year" onchange="onInsightsFilter()">
+          <option value="">ทั้งหมด</option>
+        </select>
+        <div class="fsep"></div>
+        <span class="filter-label">วัน</span>
+        <select class="fsel" id="ins_dayOfWeek" onchange="onInsightsFilter()">
+          <option value="">ทั้งหมด</option>
+          <option value="0">อาทิตย์</option>
+          <option value="1">จันทร์</option>
+          <option value="2">อังคาร</option>
+          <option value="3">พุธ</option>
+          <option value="4">พฤหัสบดี</option>
+          <option value="5">ศุกร์</option>
+          <option value="6">เสาร์</option>
+        </select>
+        <div class="fsep"></div>
+        <span class="filter-label">กำไรขั้นต่ำ</span>
+        <input type="number" class="fsel" id="ins_minBalance" placeholder="0" style="width:80px" onchange="onInsightsFilter()"/>
+        <span class="filter-label">สูงสุด</span>
+        <input type="number" class="fsel" id="ins_maxBalance" placeholder="999999" style="width:80px" onchange="onInsightsFilter()"/>
+        <button class="btn btn-ghost btn-sm ml-auto" onclick="resetInsightsFilter()">↻ รีเซ็ต</button>
+        <span class="t-muted t-sm" id="insFilterInfo">— รายการ</span>
+      </div>
+
+      <!-- Sub-tabs -->
+      <div class="detail-tabs">
+        <div class="dtab active" onclick="switchDtab('overview',this)">ภาพรวม</div>
+        <div class="dtab" onclick="switchDtab('byday',this)">รายวัน</div>
+        <div class="dtab" onclick="switchDtab('bymonth',this)">รายเดือน</div>
+        <div class="dtab" onclick="switchDtab('byexp',this)">ค่าใช้จ่าย</div>
+        <div class="dtab" onclick="switchDtab('reco',this)">Recommendations</div>
+      </div>
+
+      <div class="dtab-panel active" id="dtab-overview">
+        <div class="insights-grid" id="insOverview"></div>
+        <div class="kpi-grid" id="insKpiGrid"></div>
+      </div>
+      <div class="dtab-panel" id="dtab-byday">
+        <div id="insByDay"></div>
+      </div>
+      <div class="dtab-panel" id="dtab-bymonth">
+        <div id="insByMonth"></div>
+      </div>
+      <div class="dtab-panel" id="dtab-byexp">
+        <div id="insByExp"></div>
+      </div>
+      <div class="dtab-panel" id="dtab-reco">
+        <div class="insights-grid" id="insReco"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- PANEL: LINE OA CONFIG -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="panel" id="panel-lineconfig">
+      <div class="sec-title" style="margin-bottom:16px">💬 Line OA — แจ้งเตือนเรียลไทม์</div>
+      
+      <div class="line-config-section">
+        <div class="line-config-title">🤖 การตั้งค่า Line OA Bot</div>
+        <p class="t-muted t-sm" style="margin-bottom:14px">ระบบจะส่งแจ้งเตือนอัตโนมัติเมื่อมีการเพิ่ม/แก้ไข/ลบข้อมูล และสามารถส่งรายงาน KPI ไปยัง Line ได้</p>
+        
+        <div class="insights-grid" style="margin-bottom:16px">
+          <div class="ins-card info">
+            <span class="ins-icon">📝</span>
+            <div>
+              <div class="ins-title">แจ้งเตือนเมื่อเพิ่มข้อมูล</div>
+              <div class="ins-body">ส่งสรุปรายการที่เพิ่มใหม่: วันที่, ยอดขาย, รายได้, ค่าใช้จ่าย, กำไร</div>
+            </div>
+          </div>
+          <div class="ins-card pos">
+            <span class="ins-icon">✏️</span>
+            <div>
+              <div class="ins-title">แจ้งเตือนเมื่อแก้ไขข้อมูล</div>
+              <div class="ins-body">ส่งข้อมูลที่แก้ไขพร้อมรายละเอียดครบถ้วน</div>
+            </div>
+          </div>
+          <div class="ins-card neg">
+            <span class="ins-icon">🗑</span>
+            <div>
+              <div class="ins-title">แจ้งเตือนเมื่อลบข้อมูล</div>
+              <div class="ins-body">แจ้งเตือนเมื่อมีรายการถูกลบ</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap3" style="flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="sendKpiReport()">📊 ส่ง KPI Report</button>
+          <button class="btn btn-success" onclick="sendDeepAnalysis()">🧠 ส่ง Deep Analysis</button>
+          <button class="btn btn-ghost" onclick="sendCustomLineMsg()">💬 ส่งข้อความกำหนดเอง</button>
+        </div>
+      </div>
+
+      <!-- KPI Commands Info -->
+      <div class="card mt3">
+        <div class="sec-title" style="margin-bottom:14px;font-size:13px">🤖 คำสั่งบอทที่ยืดหยุ่น (Flexible Bot Commands)</div>
+        <div style="display:grid;gap:10px">
+          <div class="ins-card info">
+            <span class="ins-icon">📊</span>
+            <div>
+              <div class="ins-title">KPI Report</div>
+              <div class="ins-body">ส่งรายงานสรุป: รายได้รวม, ค่าใช้จ่าย, กำไร, Margin, Conversion Rate, ยอดขายวันนี้</div>
+            </div>
+          </div>
+          <div class="ins-card pos">
+            <span class="ins-icon">🧠</span>
+            <div>
+              <div class="ins-title">Deep Analysis</div>
+              <div class="ins-body">วิเคราะห์เชิงลึก: แนวโน้มธุรกิจ, วันที่ดีที่สุด/แย่ที่สุด, โครงสร้างค่าใช้จ่าย, คำแนะนำ</div>
+            </div>
+          </div>
+          <div class="ins-card warn">
+            <span class="ins-icon">⚡</span>
+            <div>
+              <div class="ins-title">Real-time Alerts</div>
+              <div class="ins-body">แจ้งเตือนอัตโนมัติเมื่อมีการเปลี่ยนแปลงข้อมูล (เพิ่ม/แก้ไข/ลบ)</div>
+            </div>
+          </div>
+          <div class="ins-card info">
+            <span class="ins-icon">💬</span>
+            <div>
+              <div class="ins-title">Custom Message</div>
+              <div class="ins-body">ส่งข้อความกำหนดเองไปยัง Line OA ได้ทันที</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- PANEL: REPORT GENERATOR -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="panel" id="panel-report">
+      <div class="sec-title" style="margin-bottom:16px">📑 Auto Report Sheet Generator</div>
+
+      <div class="report-banner">
+        <div class="report-banner-text">
+          <div class="rb-title">🚀 สร้างชีตรายงานวิเคราะห์อัตโนมัติ</div>
+          <div class="rb-sub">ระบบจะสร้าง Sheet ชื่อ "Analytics_Report" ใน Google Sheets พร้อมข้อมูลวิเคราะห์เชิงลึกครบถ้วน</div>
+        </div>
+        <button class="btn btn-primary" onclick="genReport()">⚡ สร้าง Report Sheet</button>
+      </div>
+
+      <div class="card" style="max-width:700px">
+        <div class="sec-title" style="margin-bottom:14px;font-size:13px">📋 รายละเอียดชีตที่จะสร้าง</div>
+        <div style="display:grid;gap:10px">
+          <div class="ins-card info">
+            <span class="ins-icon">📊</span>
+            <div><div class="ins-title">OVERVIEW SUMMARY</div>
+            <div class="ins-body">สรุปภาพรวมทั้งหมด: Revenue, Expense, Balance, Margin, Conversion Rate, จำนวนวัน, ยอดขายรวม</div></div>
+          </div>
+          <div class="ins-card pos">
+            <span class="ins-icon">📅</span>
+            <div><div class="ins-title">DAY OF WEEK ANALYSIS</div>
+            <div class="ins-body">วิเคราะห์รายวัน จันทร์–อาทิตย์: จำนวนวัน, ยอดขายรวม/เฉลี่ย, รายได้รวม/เฉลี่ย, กำไร, Margin</div></div>
+          </div>
+          <div class="ins-card pos">
+            <span class="ins-icon">📆</span>
+            <div><div class="ins-title">MONTHLY ANALYSIS</div>
+            <div class="ins-body">วิเคราะห์รายเดือน: รายได้, ค่าใช้จ่าย, กำไร, Margin รายเดือน เพื่อดูแนวโน้ม</div></div>
+          </div>
+          <div class="ins-card warn">
+            <span class="ins-icon">💸</span>
+            <div><div class="ins-title">EXPENSE BREAKDOWN</div>
+            <div class="ins-body">แยกประเภทค่าใช้จ่าย: PipeFee, ShareFee, OtherFee, SaveFee พร้อมสัดส่วนและการวิเคราะห์</div></div>
+          </div>
+          <div class="ins-card info">
+            <span class="ins-icon">🏆</span>
+            <div><div class="ins-title">TOP/WORST PERFORMANCE DAYS</div>
+            <div class="ins-body">5 วันที่กำไรสูงสุด และ 5 วันที่กำไรต่ำสุด พร้อม Margin</div></div>
+          </div>
+          <div class="ins-card info">
+            <span class="ins-icon">🧠</span>
+            <div><div class="ins-title">BUSINESS INSIGHTS TEXT</div>
+            <div class="ins-body">สรุป Insights เชิงธุรกิจอัตโนมัติ: คำแนะนำ, ความเสี่ยง, โอกาส</div></div>
+          </div>
+        </div>
+
+        <div class="flex gap2 mt3">
+          <button class="btn btn-primary" onclick="genReport()">⚡ สร้าง Report Sheet ทันที</button>
+          <a href="https://docs.google.com/spreadsheets/d/11vhg37MbHRm53SSEHLsCI3EBXx5_meXVvlRuqhFteaY/edit" target="_blank">
+            <button class="btn btn-ghost">🔗 เปิด Google Sheets</button>
+          </a>
+        </div>
+      </div>
+    </div>
+<div class="panel" id="panel-commands">
+  <!-- ใส่ Command Executor Section ทั้งหมดตรงนี้ -->
+     <!-- ═══════════════════════════════════════════════════ -->
+<!-- COMMAND EXECUTOR SECTION -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="command-section">
+  <h2>🤖 คำสั่งทั้งหมด</h2>
+  
+  <!-- Categories -->
+  <div class="cmd-categories" id="cmdCategories">
+    <button class="cmd-category active" onclick="filterCommands('all', this)">📋 ทั้งหมด</button>
+    <button class="cmd-category" onclick="filterCommands('report', this)">📊 รายงาน</button>
+    <button class="cmd-category" onclick="filterCommands('analysis', this)">🔍 วิเคราะห์</button>
+    <button class="cmd-category" onclick="filterCommands('finance', this)">💰 การเงิน</button>
+    <button class="cmd-category" onclick="filterCommands('risk', this)">⚠️ ความเสี่ยง</button>
+    <button class="cmd-category" onclick="filterCommands('planning', this)">🎯 วางแผน</button>
+    <button class="cmd-category" onclick="filterCommands('other', this)">📋 อื่นๆ</button>
+  </div>
+
+  <!-- Quick Command Buttons -->
+  <div class="command-grid" id="commandGrid">
+    <!-- Filled by JavaScript -->
+  </div>
+
+  <!-- Search & Execute -->
+  <div class="cmd-search">
+    <input type="text" id="cmdInput" placeholder="🔍 พิมพ์คำสั่ง เช่น /kpi, /today, /health... แล้วกด Enter"
+           onkeypress="if(event.key==='Enter') executeCmd()">
+    <button class="cmd-execute-btn" onclick="executeCmd()">▶ ส่งคำสั่ง</button>
+    <button class="cmd-execute-btn" style="background:#10b981;" onclick="executeCmd('/help')">❓ วิธีใช้</button>
+    <button class="cmd-execute-btn" style="background:#f59e0b;color:#1e293b;" onclick="generateReportFromWeb()">📄 สร้าง Report</button>
+  </div>
+
+  <!-- Result Display -->
+  <div class="cmd-result" id="cmdResult">
+    <div class="empty">
+      <div style="font-size:3rem;">🚀</div>
+      <h3>พร้อมใช้งาน!</h3>
+      <p>เลือกคำสั่งจากด้านบน หรือพิมพ์คำสั่งในช่องค้นหา</p>
+      <p style="font-size:0.75rem;">ตัวอย่าง: /kpi, /today, /health, /help</p>
+    </div>
+  </div>
+</div>
+
+</div>
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- Modal: Edit -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">✏️ แก้ไขข้อมูล</div>
+      <button class="btn btn-ghost btn-xs" onclick="closeModal()">✕ ปิด</button>
+    </div>
+    <div class="form-2col">
+      <input type="hidden" id="e_row"/>
+      <div class="fgroup"><label>วันที่</label><input type="date" class="finp" id="e_date"/></div>
+      <div class="fgroup"><label>Sold</label><input type="number" class="finp" id="e_sold" min="0"/></div>
+      <div class="fgroup"><label>Pending</label><input type="number" class="finp" id="e_pending" min="0"/></div>
+      <div class="fgroup"><label>Cleared</label><input type="number" class="finp" id="e_cleared" min="0"/></div>
+      <div class="fgroup"><label>PipeFee</label><input type="number" class="finp" id="e_pipe" min="0"/></div>
+      <div class="fgroup"><label>ShareFee</label><input type="number" class="finp" id="e_share" min="0"/></div>
+      <div class="fgroup"><label>OtherFee</label><input type="number" class="finp" id="e_other" min="0"/></div>
+      <div class="fgroup"><label>SaveFee</label><input type="number" class="finp" id="e_save" min="0"/></div>
+      <div class="fspan flex gap2">
+        <button class="btn btn-primary" onclick="saveEdit()">💾 บันทึก</button>
+        <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Custom Line Message -->
+<div class="modal-bg" id="lineMsgModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">💬 ส่งข้อความไปยัง Line OA</div>
+      <button class="btn btn-ghost btn-xs" onclick="closeLineMsgModal()">✕ ปิด</button>
+    </div>
+    <div class="fgroup">
+      <label>ข้อความ</label>
+      <textarea class="finp" id="lineMsgText" rows="5" placeholder="พิมพ์ข้อความที่ต้องการส่ง..." style="resize:vertical;min-height:100px;font-family:var(--fh);font-size:13px"></textarea>
+    </div>
+    <div class="flex gap2 mt3">
+      <button class="btn btn-primary" onclick="sendLineMessage()">📤 ส่งข้อความ</button>
+      <button class="btn btn-ghost" onclick="closeLineMsgModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-ov" id="loadOv">
+  <div class="spin"></div>
+  <div class="loading-txt" id="loadTxt">กำลังโหลด...</div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS & STATE
+// ═══════════════════════════════════════════════════════════════
+const PRICE = 40;
+let allData = [], filteredData = [];
+let insightsData = null;
+let sortK = 'date', sortD = -1;
+let page = 1; const PAGE = 10;
+let charts = {};
+let historyPage = 1; const HISTORY_PAGE_SIZE = 10;
+let hasMoreHistory = true;
+let historySearchQuery = '';
+
+// ═══════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.innerWidth <= 760) document.getElementById('menuBtn').style.display = '';
+  setTodayDate();
+  buildMonthYearSelects();
+  buildInsightsYearSelect();
+  loadData();
+});
+
+function setTodayDate() {
+  document.getElementById('f_date').value = todayStr();
+}
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+function buildMonthYearSelects() {
+  const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const mSel = document.getElementById('filterMonth');
+  const ySel = document.getElementById('filterYear');
+  mSel.innerHTML = '<option value="">-- เดือน --</option>';
+  months.forEach((m,i) => mSel.innerHTML += `<option value="${i+1}">${m}</option>`);
+  const y = new Date().getFullYear();
+  ySel.innerHTML = '<option value="">-- ปี --</option>';
+  for(let i=y;i>=y-5;i--) ySel.innerHTML += `<option value="${i}">${i}</option>`;
+}
+
+function buildInsightsYearSelect() {
+  const ySel = document.getElementById('ins_year');
+  const y = new Date().getFullYear();
+  ySel.innerHTML = '<option value="">ทั้งหมด</option>';
+  for(let i=y;i>=y-5;i--) ySel.innerHTML += `<option value="${i}">${i}</option>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+function loadData() {
+  showLoad('กำลังโหลดข้อมูล...');
+  google.script.run
+    .withSuccessHandler(r => {
+      hideLoad();
+      if (r.success) {
+        allData = r.data || [];
+        document.getElementById('histBadge').textContent = Math.min(allData.length, 10);
+        document.getElementById('lastSync').textContent = 'Sync: ' + new Date().toLocaleTimeString('th-TH');
+        onFilter();
+        renderHistory(true);
+        renderInsightsPanel();
+        toast('โหลดสำเร็จ ' + allData.length + ' รายการ', 'ok');
+      } else toast('Error: ' + r.error, 'err');
+    })
+    .withFailureHandler(e => { hideLoad(); toast('Connection error: ' + e.message, 'err'); })
+    .getSalesData();
+}
+
+function refreshAll() { loadData(); }
+
+// ═══════════════════════════════════════════════════════════════
+// INSIGHTS FILTER
+// ═══════════════════════════════════════════════════════════════
+function onInsightsFilter() {
+  const filterParams = {
+    dateFrom: document.getElementById('ins_dateFrom').value || null,
+    dateTo: document.getElementById('ins_dateTo').value || null,
+    month: document.getElementById('ins_month').value || null,
+    year: document.getElementById('ins_year').value || null,
+    dayOfWeek: document.getElementById('ins_dayOfWeek').value || null,
+    minBalance: document.getElementById('ins_minBalance').value || null,
+    maxBalance: document.getElementById('ins_maxBalance').value || null,
+  };
+
+  showLoad('กำลังวิเคราะห์ข้อมูล...');
+  google.script.run
+    .withSuccessHandler(r => {
+      hideLoad();
+      if (r.success) {
+        insightsData = r.data;
+        document.getElementById('insFilterInfo').textContent = 
+          r.data.filteredRecords.length + ' รายการที่ตรงตามเงื่อนไข';
+        renderInsightsWithData(insightsData);
+        toast('วิเคราะห์สำเร็จ ' + r.data.filteredRecords.length + ' รายการ', 'ok');
+      } else {
+        toast('Error: ' + r.error, 'err');
+      }
+    })
+    .withFailureHandler(e => {
+      hideLoad();
+      toast('Connection error: ' + e.message, 'err');
+    })
+    .getFilteredInsightsData(filterParams);
+}
+
+function resetInsightsFilter() {
+  document.getElementById('ins_dateFrom').value = '';
+  document.getElementById('ins_dateTo').value = '';
+  document.getElementById('ins_month').value = '';
+  document.getElementById('ins_year').value = '';
+  document.getElementById('ins_dayOfWeek').value = '';
+  document.getElementById('ins_minBalance').value = '';
+  document.getElementById('ins_maxBalance').value = '';
+  onInsightsFilter();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER INSIGHTS WITH FILTERED DATA
+// ═══════════════════════════════════════════════════════════════
+function renderInsightsWithData(d) {
+  if (!d || !d.filteredRecords.length) {
+    ['insOverview','insKpiGrid','insByDay','insByMonth','insByExp','insReco'].forEach(id => {
+      document.getElementById(id).innerHTML = '<p style="color:var(--t2);padding:20px">ไม่มีข้อมูลที่ตรงตามเงื่อนไข</p>';
+    });
+    return;
+  }
+
+  const { summary, dayStats, monthlyStats, expenseBreakdown, top5, bottom5, insights } = d;
+
+  // KPI Cards
+  const margin = summary.profitMargin;
+  const convRate = summary.conversionRate;
+  
+  document.getElementById('insKpiGrid').innerHTML = `
+    <div class="kpi" style="--kc1:#4d8bff;--kc2:#7b6cff">
+      <div class="kpi-stripe"></div>
+      <span class="kpi-icon">💰</span>
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value">฿${summary.totalRevenue.toLocaleString()}</div>
+      <div class="kpi-sub">${summary.totalDays} วัน</div>
+    </div>
+    <div class="kpi" style="--kc1:#ff3d5a;--kc2:#ff8c42">
+      <div class="kpi-stripe"></div>
+      <span class="kpi-icon">💸</span>
+      <div class="kpi-label">Total Expense</div>
+      <div class="kpi-value">฿${summary.totalExpense.toLocaleString()}</div>
+      <div class="kpi-sub">เฉลี่ย ฿${(summary.totalExpense/summary.totalDays).toFixed(0)}/วัน</div>
+    </div>
+    <div class="kpi" style="--kc1:${summary.totalBalance>=0?'#10d98a':'#ff3d5a'};--kc2:${summary.totalBalance>=0?'#22d3ee':'#ff6b6b'}">
+      <div class="kpi-stripe"></div>
+      <span class="kpi-icon">📈</span>
+      <div class="kpi-label">Net Profit</div>
+      <div class="kpi-value">฿${summary.totalBalance.toLocaleString()}</div>
+      <div class="kpi-sub">Margin ${margin.toFixed(1)}%</div>
+    </div>
+    <div class="kpi" style="--kc1:#a855f7;--kc2:#7b6cff">
+      <div class="kpi-stripe"></div>
+      <span class="kpi-icon">🎯</span>
+      <div class="kpi-label">Profit Margin</div>
+      <div class="kpi-value">${margin.toFixed(1)}%</div>
+      <div class="kpi-sub">${margin>=30?'✅ ดี':margin>=15?'⚠️ ปานกลาง':'❌ ต่ำ'}</div>
+    </div>
+    <div class="kpi" style="--kc1:#f59e0b;--kc2:#ff8c42">
+      <div class="kpi-stripe"></div>
+      <span class="kpi-icon">🛒</span>
+      <div class="kpi-label">Total Sold</div>
+      <div class="kpi-value">${summary.totalSold} ชิ้น</div>
+      <div class="kpi-sub">Pending: ${summary.totalPending} | Cleared: ${summary.totalCleared}</div>
+    </div>
+    <div class="kpi" style="--kc1:#22d3ee;--kc2:#4d8bff">
+      <div class="kpi-stripe"></div>
+      <span class="kpi-icon">🎯</span>
+      <div class="kpi-label">Conversion</div>
+      <div class="kpi-value">${convRate.toFixed(1)}%</div>
+      <div class="kpi-sub">${convRate>=70?'✅ ดีมาก':convRate>=50?'⚠️ ปานกลาง':'❌ ต่ำ'}</div>
+    </div>
+  `;
+
+  // Overview cards
+  const ov = insights || [];
+  document.getElementById('insOverview').innerHTML = ov.map(c => {
+    const cls = c.type === 'positive' ? 'pos' : c.type === 'negative' ? 'neg' : c.type === 'warning' ? 'warn' : 'info';
+    return `<div class="ins-card ${cls}"><span class="ins-icon">${c.icon}</span><div><div class="ins-title">${c.title}</div><div class="ins-body">${c.body}</div></div></div>`;
+  }).join('');
+
+  // By Day
+  const dayNames = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+  const maxDay = dayStats.reduce((m, s, i) => s.count > 0 && s.balance > dayStats[m].balance ? i : m, 0);
+  const minDay = dayStats.reduce((m, s, i) => s.count > 0 && s.balance < dayStats[m].balance ? i : m, dayStats.findIndex(s => s.count > 0));
+
+  document.getElementById('insByDay').innerHTML = `
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>วัน</th><th>จำนวนวัน</th><th>ขายรวม</th><th>ขายเฉลี่ย/วัน</th><th>รายได้รวม</th><th>รายได้เฉลี่ย</th><th>ค่าใช้จ่าย</th><th>กำไรรวม</th><th>กำไรเฉลี่ย</th><th>Margin%</th></tr></thead>
+      <tbody>${dayStats.map((s, i) => {
+        const avg = s.count > 0 ? Math.round(s.sold / s.count) : 0;
+        const avgRev = s.count > 0 ? Math.round(s.revenue / s.count) : 0;
+        const avgBal = s.count > 0 ? Math.round(s.balance / s.count) : 0;
+        const mg = s.revenue > 0 ? (s.balance / s.revenue * 100).toFixed(1) : 0;
+        const cls = i === maxDay ? 'style="color:var(--green)"' : i === minDay && s.count > 0 ? 'style="color:var(--red)"' : '';
+        return `<tr ${cls}>
+          <td class="t-bold">${dayNames[i]}</td><td>${s.count}</td>
+          <td>${s.sold}</td><td>${avg}</td>
+          <td class="t-blue">฿${s.revenue.toLocaleString()}</td>
+          <td>฿${avgRev.toLocaleString()}</td>
+          <td class="t-red">฿${s.expense.toLocaleString()}</td>
+          <td class="${s.balance>=0?'t-green':'t-red'} t-bold">฿${s.balance.toLocaleString()}</td>
+          <td>฿${avgBal.toLocaleString()}</td><td>${mg}%</td>
+        </tr>`;
+      }).join('')}</tbody></table></div>
+    <div class="flex gap2 mt3">
+      <div class="ins-card pos" style="flex:1"><span class="ins-icon">🏆</span><div><div class="ins-title">วันที่ดีที่สุด: ${dayNames[maxDay]}</div><div class="ins-body">กำไรรวม ฿${dayStats[maxDay].balance.toLocaleString()} | ${dayStats[maxDay].count} วัน | เฉลี่ย ฿${(dayStats[maxDay].count?dayStats[maxDay].balance/dayStats[maxDay].count:0).toFixed(0)}/วัน</div></div></div>
+      ${dayStats[minDay]?.count>0?`<div class="ins-card neg" style="flex:1"><span class="ins-icon">⚠️</span><div><div class="ins-title">วันที่ควรปรับ: ${dayNames[minDay]}</div><div class="ins-body">กำไรรวม ฿${dayStats[minDay].balance.toLocaleString()} ควรพิจารณากลยุทธ์เพิ่มยอดขายในวันนี้</div></div></div>`:''}
+    </div>`;
+
+  // By Month
+  const thM = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  document.getElementById('insByMonth').innerHTML = `
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>เดือน</th><th>วัน</th><th>ยอดขาย</th><th>รายได้</th><th>ค่าใช้จ่าย</th><th>กำไร</th><th>Margin%</th><th>รายได้/วัน</th><th>กำไร/วัน</th></tr></thead>
+      <tbody>${monthlyStats.map(m => {
+        const [yr, mo] = m.month.split('-');
+        const mg = m.revenue > 0 ? (m.balance / m.revenue * 100).toFixed(1) : 0;
+        return `<tr>
+          <td class="t-bold">${thM[+mo]} ${yr}</td>
+          <td>${m.count}</td><td>${m.sold}</td>
+          <td class="t-blue">฿${m.revenue.toLocaleString()}</td>
+          <td class="t-red">฿${m.expense.toLocaleString()}</td>
+          <td class="${m.balance>=0?'t-green':'t-red'} t-bold">฿${m.balance.toLocaleString()}</td>
+          <td>${mg}%</td>
+          <td>฿${(m.count ? m.revenue/m.count : 0).toFixed(0)}</td>
+          <td>฿${(m.count ? m.balance/m.count : 0).toFixed(0)}</td>
+        </tr>`;
+      }).join('')}</tbody></table></div>`;
+
+  // By Expense
+  const totAll = expenseBreakdown.total || 1;
+  document.getElementById('insByExp').innerHTML = `
+    <div class="tbl-wrap mt2"><table>
+      <thead><tr><th>ประเภท</th><th>รวม (฿)</th><th>สัดส่วน %</th><th>เฉลี่ย/วัน</th><th>วิเคราะห์</th></tr></thead>
+      <tbody>
+        ${[
+          ['Pipeline Fee', expenseBreakdown.pipeFee],
+          ['Share Fee', expenseBreakdown.shareFee],
+          ['Other Fee', expenseBreakdown.otherFee],
+          ['Save Fee', expenseBreakdown.saveFee]
+        ].map(([name, v]) => {
+          const pct = (v / totAll * 100).toFixed(1);
+          const avg = summary.totalDays ? (v / summary.totalDays).toFixed(0) : 0;
+          const warn = v / totAll > 0.5 ? '⚠️ สัดส่วนสูงมาก' : v / totAll > 0.3 ? 'ตรวจสอบ' : 'ปกติ';
+          return `<tr><td class="t-bold">${name}</td><td class="t-amber">฿${v.toLocaleString()}</td><td>${pct}%</td><td>฿${Number(avg).toLocaleString()}</td><td class="${v/totAll>0.5?'t-red':''}">${warn}</td></tr>`;
+        }).join('')}
+        <tr style="border-top:1px solid var(--b2)"><td class="t-bold">รวมทั้งหมด</td><td class="t-red t-bold">฿${totAll.toLocaleString()}</td><td>100%</td><td>฿${(summary.totalDays ? totAll/summary.totalDays : 0).toFixed(0)}</td><td>—</td></tr>
+      </tbody></table></div>
+    <div class="insights-grid mt3">
+      ${expenseBreakdown.pipeFee/totAll>0.5?`<div class="ins-card neg"><span class="ins-icon">⚠️</span><div><div class="ins-title">Pipeline Fee สูงผิดปกติ</div><div class="ins-body">Pipeline Fee คิดเป็น ${(expenseBreakdown.pipeFee/totAll*100).toFixed(1)}% ของค่าใช้จ่ายรวม ควรเจรจาลดอัตราหรือเปลี่ยน Partner</div></div></div>`:''}
+      <div class="ins-card info"><span class="ins-icon">💡</span><div><div class="ins-title">แนวทางลดค่าใช้จ่าย</div><div class="ins-body">ควร Audit ค่าใช้จ่ายทุกประเภทรายเดือน หากค่าใช้จ่ายใดเกิน 40% ของรายได้ควรปรับโครงสร้างทันที</div></div></div>
+    </div>`;
+
+  // Recommendations
+  const rec = [];
+  if (margin < 20) rec.push({t:'neg',i:'🔴',title:'ปรับโครงสร้างราคาด่วน',body:`Margin ${margin.toFixed(1)}% ต่ำกว่าเกณฑ์ขั้นต่ำ 20% พิจารณาเพิ่มราคาต่อหน่วยหรือลดต้นทุน`});
+  if (convRate < 60) rec.push({t:'warn',i:'⏳',title:'ลด Pending Rate',body:`Conversion Rate ${convRate.toFixed(1)}% ต่ำ ควรกำหนด Payment Deadline ชัดเจน, ส่ง Follow-up อัตโนมัติ`});
+  rec.push({t:'pos',i:'📈',title:'เพิ่มยอดขายวันที่ดีที่สุด',body:`โฟกัสทรัพยากรและ Marketing Budget ในวันที่มียอดขายดีที่สุด เพื่อ Maximize Revenue`});
+  rec.push({t:'info',i:'💰',title:'Cash Flow Management',body:'ควรมี Emergency Fund อย่างน้อย 3 เดือนของค่าใช้จ่าย และตรวจสอบ Balance Sheet รายสัปดาห์'});
+  rec.push({t:'info',i:'🎯',title:'ตั้งเป้า KPI รายสัปดาห์',body:`เป้าหมายแนะนำ: Margin ≥ 30%, Conversion ≥ 70%, กำไร/วัน ≥ ฿${(summary.totalDays?summary.totalBalance/summary.totalDays*1.1:0).toFixed(0)}`});
+  
+  document.getElementById('insReco').innerHTML = rec.map(c => {
+    const cls = c.t === 'pos' ? 'pos' : c.t === 'neg' ? 'neg' : c.t === 'warn' ? 'warn' : 'info';
+    return `<div class="ins-card ${cls}"><span class="ins-icon">${c.i}</span><div><div class="ins-title">${c.title}</div><div class="ins-body">${c.body}</div></div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER INSIGHTS (ใช้ข้อมูลทั้งหมดหรือข้อมูลที่กรอง)
+// ═══════════════════════════════════════════════════════════════
+function renderInsightsPanel() {
+  if (insightsData && insightsData.filteredRecords.length > 0) {
+    renderInsightsWithData(insightsData);
+    return;
+  }
+  onInsightsFilter();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FILTER (Dashboard)
+// ═══════════════════════════════════════════════════════════════
+function onFilter() {
+  const p = document.getElementById('filterPreset').value;
+  const mS = document.getElementById('filterMonth');
+  const yS = document.getElementById('filterYear');
+  const cR = document.getElementById('customRange');
+
+  mS.classList.add('hidden');
+  yS.classList.add('hidden');
+  cR.classList.add('hidden');
+
+  let from = null, to = null;
+  const now = new Date();
+
+  if (p === 'today') {
+    from = to = todayStr();
+  } else if (p === 'week') {
+    const d = new Date(now);
+    const dow = d.getDay() || 7;
+    d.setDate(d.getDate() - dow + 1);
+    from = d.toISOString().split('T')[0];
+    const e = new Date(d); e.setDate(d.getDate() + 6);
+    to = e.toISOString().split('T')[0];
+  } else if (p === 'month') {
+    mS.classList.remove('hidden');
+    yS.classList.remove('hidden');
+    const mo = parseInt(mS.value) || (now.getMonth()+1);
+    const yr = parseInt(yS.value) || now.getFullYear();
+    from = `${yr}-${String(mo).padStart(2,'0')}-01`;
+    to   = `${yr}-${String(mo).padStart(2,'0')}-${new Date(yr,mo,0).getDate()}`;
+  } else if (p === 'custom') {
+    cR.classList.remove('hidden');
+    from = document.getElementById('dateFrom').value;
+    to   = document.getElementById('dateTo').value;
+  }
+
+  filteredData = allData.filter(r => {
+    if (!from && !to) return true;
+    if (from && r.date < from) return false;
+    if (to   && r.date > to)   return false;
+    return true;
+  });
+
+  document.getElementById('filterInfo').textContent = filteredData.length + ' รายการ';
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderDashboard() {
+  renderKPI();
+  renderDayGrid();
+  renderCharts();
+  renderTable();
+}
+
+/* ── KPI ─────────────────────────────────────────────────────── */
+function renderKPI() {
+  const d = filteredData;
+  if (!d.length) {
+    document.getElementById('kpiGrid').innerHTML = '<p style="color:var(--t2);padding:20px;text-align:center">ไม่มีข้อมูลในช่วงเวลาที่เลือก</p>';
+    return;
+  }
+  const tRev  = sum(d,'revenue'), tExp = sum(d,'expense'), tBal = sum(d,'balance');
+  const tSold = sum(d,'sold'), tPend = sum(d,'pending'), tClr = sum(d,'cleared');
+  const margin = tRev > 0 ? (tBal/tRev*100).toFixed(1) : 0;
+  const conv   = tSold > 0 ? ((tSold-tPend)/tSold*100).toFixed(1) : 0;
+
+  const h = Math.floor(d.length/2);
+  const prev = d.slice(0,h), curr = d.slice(h);
+  function tr(key) {
+    const c = sum(curr,key), p = sum(prev,key);
+    return c > p ? 'up' : c < p ? 'dn' : 'fl';
+  }
+  function trIcon(k) { const t=tr(k); return t==='up'?'▲':t==='dn'?'▼':'─'; }
+  function trCls(k)  { const t=tr(k); return 'tr-'+t; }
+
+  const kpis = [
+    {icon:'💰',label:'Total Revenue',val:fmt(tRev),sub:`${d.length} วัน | เฉลี่ย ${fmt(d.length?tRev/d.length:0)}/วัน`,
+     tKey:'revenue',c1:'#4d8bff',c2:'#7b6cff'},
+    {icon:'💸',label:'Total Expense',val:fmt(tExp),sub:`เฉลี่ย ${fmt(d.length?tExp/d.length:0)}/วัน`,
+     tKey:'expense',c1:'#ff3d5a',c2:'#ff8c42'},
+    {icon:'📈',label:'Net Profit',val:fmt(tBal),sub:`Margin ${margin}%`,
+     tKey:'balance',c1:tBal>=0?'#10d98a':'#ff3d5a',c2:tBal>=0?'#22d3ee':'#ff6b6b'},
+    {icon:'🎯',label:'Profit Margin',val:margin+'%',sub:margin>=30?'✅ ดี':margin>=15?'⚠️ ปานกลาง':'❌ ต่ำ',
+     tKey:null,c1:'#a855f7',c2:'#7b6cff'},
+    {icon:'🛒',label:'Total Sold',val:tSold+' ชิ้น',sub:`เฉลี่ย ${d.length?Math.round(tSold/d.length):0}/วัน`,
+     tKey:'sold',c1:'#f59e0b',c2:'#ff8c42'},
+    {icon:'⏳',label:'Pending',val:tPend+' ชิ้น',sub:`฿${fmt(tPend*PRICE)}`,
+     tKey:null,c1:'#ff8c42',c2:'#ff3d5a'},
+    {icon:'✅',label:'Cleared',val:tClr+' ชิ้น',sub:`฿${fmt(tClr*PRICE)}`,
+     tKey:null,c1:'#10d98a',c2:'#22d3ee'},
+    {icon:'🎯',label:'Conversion',val:conv+'%',sub:conv>=70?'✅ ดีมาก':conv>=50?'⚠️ ปานกลาง':'❌ ต่ำ',
+     tKey:null,c1:'#22d3ee',c2:'#4d8bff'},
+  ];
+
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k => {
+    const tHtml = k.tKey
+      ? `<div class="kpi-trend ${trCls(k.tKey)}">${trIcon(k.tKey)}</div>` : '';
+    return `<div class="kpi" style="--kc1:${k.c1};--kc2:${k.c2}">
+      <div class="kpi-stripe"></div>
+      ${tHtml}
+      <span class="kpi-icon">${k.icon}</span>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.val}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Day Grid ────────────────────────────────────────────────── */
+function renderDayGrid() {
+  const days   = ['จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์','อาทิตย์'];
+  const stats  = days.map(()=>({cnt:0,sold:0,rev:0,exp:0,bal:0}));
+
+  filteredData.forEach(r => {
+    if(!r.date) return;
+    const dow = new Date(r.date).getDay();
+    const idx = dow===0?6:dow-1;
+    stats[idx].cnt++; stats[idx].sold+=r.sold;
+    stats[idx].rev+=r.revenue; stats[idx].exp+=r.expense; stats[idx].bal+=r.balance;
+  });
+
+  const bals   = stats.map(s=>s.bal);
+  const maxBal = Math.max(...bals), minBal = Math.min(...bals);
+
+  document.getElementById('dayGrid').innerHTML = days.map((d,i) => {
+    const s   = stats[i];
+    const cls = s.cnt>0 && s.bal===maxBal ? 'best' : s.cnt>0 && s.bal===minBal && minBal<0 ? 'worst' : '';
+    const avg = s.cnt>0 ? Math.round(s.sold/s.cnt) : 0;
+    const avgRev = s.cnt>0 ? Math.round(s.rev/s.cnt) : 0;
+    return `<div class="day-card ${cls}">
+      <div class="day-name">${d}</div>
+      <div class="day-val">${s.cnt} วัน</div>
+      <div class="day-sub">${s.sold} ชิ้น (เฉลี่ย ${avg})</div>
+      <div class="day-rev">${fmtS(s.rev)}</div>
+      <div class="day-sub t-muted">เฉลี่ย ${fmtS(avgRev)}/วัน</div>
+      <div class="day-sub ${s.bal>=0?'t-green':'t-red'}" style="font-weight:700;margin-top:3px">${fmtS(s.bal)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Charts ──────────────────────────────────────────────────── */
+Chart.defaults.color = '#525978';
+Chart.defaults.font.family = "'JetBrains Mono',monospace";
+Chart.defaults.font.size   = 11;
+
+function dc(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+function renderCharts() {
+  const d = filteredData.slice().sort((a,b)=>a.date>b.date?1:-1);
+  if (!d.length) return;
+  const L = d.map(r=>r.date.slice(5));
+  const GRID = {color:'rgba(255,255,255,.04)'};
+
+  dc('re');
+  charts['re'] = new Chart(document.getElementById('cRevExp'),{
+    type:'line', data:{labels:L, datasets:[
+      {label:'Revenue',data:d.map(r=>r.revenue),borderColor:'#4d8bff',backgroundColor:'rgba(77,139,255,.07)',fill:true,tension:.4,pointRadius:3,pointHoverRadius:5},
+      {label:'Expense',data:d.map(r=>r.expense),borderColor:'#ff3d5a',backgroundColor:'rgba(255,61,90,.05)',fill:true,tension:.4,pointRadius:3},
+      {label:'Balance',data:d.map(r=>r.balance),borderColor:'#10d98a',backgroundColor:'rgba(16,217,138,.05)',fill:true,tension:.4,pointRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{grid:GRID},y:{grid:GRID,ticks:{callback:v=>fmtS(v)}}},
+      plugins:{legend:{position:'top',labels:{boxWidth:10,padding:12}}}}
+  });
+
+  const pf=sum(filteredData,'pipeFee'),sf=sum(filteredData,'shareFee'),
+        of=sum(filteredData,'otherFee'),sv=sum(filteredData,'saveFee');
+  dc('pie');
+  charts['pie'] = new Chart(document.getElementById('cPie'),{
+    type:'doughnut',
+    data:{labels:['PipeFee','ShareFee','OtherFee','SaveFee'],
+      datasets:[{data:[pf,sf,of,sv],backgroundColor:['#4d8bff','#f59e0b','#10d98a','#ff3d5a'],
+        borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
+      plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}}}
+  });
+
+  dc('sb');
+  charts['sb'] = new Chart(document.getElementById('cSales'),{
+    type:'bar',
+    data:{labels:L,datasets:[
+      {label:'Sold',data:d.map(r=>r.sold),backgroundColor:'rgba(16,217,138,.7)',borderRadius:3},
+      {label:'Pending',data:d.map(r=>r.pending),backgroundColor:'rgba(245,158,11,.5)',borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{grid:GRID,stacked:false},y:{grid:GRID}},
+      plugins:{legend:{position:'top',labels:{boxWidth:10,padding:10}}}}
+  });
+
+  dc('mg');
+  charts['mg'] = new Chart(document.getElementById('cMargin'),{
+    type:'line',
+    data:{labels:L,datasets:[{
+      label:'Margin %',
+      data:d.map(r=>r.revenue>0?+(r.balance/r.revenue*100).toFixed(1):0),
+      borderColor:'#a855f7',backgroundColor:'rgba(168,85,247,.08)',fill:true,tension:.4,pointRadius:3,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{grid:GRID},y:{grid:GRID,ticks:{callback:v=>v+'%'}}},
+      plugins:{legend:{display:false}}}
+  });
+
+  dc('kpi');
+  charts['kpi'] = new Chart(document.getElementById('cKpi'),{
+    type:'line',
+    data:{labels:L,datasets:[{
+      label:'Balance',
+      data:d.map(r=>r.balance),
+      borderColor:'#22d3ee',backgroundColor:'rgba(34,211,238,.07)',fill:true,tension:.4,pointRadius:3,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{grid:GRID},y:{grid:GRID,ticks:{callback:v=>fmtS(v)}}},
+      plugins:{legend:{display:false}}}
+  });
+}
+
+/* ── Table ───────────────────────────────────────────────────── */
+function sortBy(k) { sortK===k?sortD*=-1:(sortK=k,sortD=-1); renderTable(); }
+
+function renderTable() {
+  const q = (document.getElementById('tSearch').value||'').toLowerCase();
+  let rows = filteredData.filter(r => !q || Object.values(r).some(v=>String(v).toLowerCase().includes(q)));
+  rows.sort((a,b)=>{ const av=a[sortK]??'',bv=b[sortK]??''; return av>bv?sortD:av<bv?-sortD:0; });
+
+  const total=rows.length, pages=Math.ceil(total/PAGE)||1;
+  if(page>pages)page=pages;
+  const sl = rows.slice((page-1)*PAGE, page*PAGE);
+
+  document.getElementById('mainTbody').innerHTML = sl.map(r=>{
+    const mg = r.revenue>0?(r.balance/r.revenue*100).toFixed(1):0;
+    return `<tr>
+      <td>${r.date}</td>
+      <td>${r.sold}</td>
+      <td>${r.pending}</td>
+      <td>${r.cleared}</td>
+      <td class="t-blue">${fmt(r.revenue)}</td>
+      <td class="t-red">${fmt(r.expense)}</td>
+      <td class="${r.balance>=0?'t-green':'t-red'} t-bold">${fmt(r.balance)}</td>
+      <td class="${mg>=20?'t-green':mg>=0?'t-amber':'t-red'}">${mg}%</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--t2)">ไม่มีข้อมูล</td></tr>';
+
+  let ph = `<span class="pagi-info">${total} รายการ | ${page}/${pages}</span>`;
+  if(pages>1){
+    ph += `<button class="pagi-btn" onclick="goPage(${page-1})" ${page<=1?'disabled':''}>‹</button>`;
+    for(let p=Math.max(1,page-2);p<=Math.min(pages,page+2);p++)
+      ph += `<button class="pagi-btn ${p===page?'act':''}" onclick="goPage(${p})">${p}</button>`;
+    ph += `<button class="pagi-btn" onclick="goPage(${page+1})" ${page>=pages?'disabled':''}>›</button>`;
+  }
+  document.getElementById('pagi').innerHTML = ph;
+}
+
+function goPage(p){
+  const pages = Math.ceil(filteredData.length/PAGE)||1;
+  page = Math.max(1,Math.min(p,pages)); renderTable();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════════
+function searchHistory() {
+  historySearchQuery = document.getElementById('historySearch').value.toLowerCase().trim();
+  renderHistory(true);
+}
+
+function renderHistory(reset = true) {
+  if (reset) {
+    historyPage = 1;
+    hasMoreHistory = true;
+  }
+  
+  // เรียงข้อมูลและกรองตามคำค้นหา
+  let sortedData = allData.slice().sort((a, b) => b.date > a.date ? 1 : b.date < a.date ? -1 : 0);
+  
+  // กรองตามคำค้นหา (ถ้ามี)
+  if (historySearchQuery) {
+    sortedData = sortedData.filter(r => {
+      return Object.values(r).some(v => 
+        String(v).toLowerCase().includes(historySearchQuery)
+      );
+    });
+  }
+  
+  // คำนวณช่วงข้อมูลที่จะแสดง
+  const startIndex = 0;
+  const endIndex = historyPage * HISTORY_PAGE_SIZE;
+  const rows = sortedData.slice(startIndex, endIndex);
+  
+  // ตรวจสอบว่ามีข้อมูลเพิ่มหรือไม่
+  hasMoreHistory = endIndex < sortedData.length;
+  
+  // สร้าง HTML สำหรับตาราง
+  const tableBody = document.getElementById('histBody');
+  
+  if (!tableBody) {
+    console.error('Element #histBody not found');
+    return;
+  }
+  
+  if (reset) {
+    // ถ้าเป็นการโหลดครั้งแรก (reset=true) ให้ล้างตารางและสร้างใหม่
+    tableBody.innerHTML = rows.map(r => {
+      try {
+        const rowJson = JSON.stringify(r).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+        return `<tr>
+          <td>${r.date || '—'}</td>
+          <td>${r.sold || 0}</td>
+          <td>${r.pending || 0}</td>
+          <td>${r.cleared || 0}</td>
+          <td class="t-blue">${fmt(r.revenue || 0)}</td>
+          <td class="t-red">${fmt(r.expense || 0)}</td>
+          <td class="${(r.balance || 0) >= 0 ? 't-green' : 't-red'} t-bold">${fmt(r.balance || 0)}</td>
+          <td class="t-muted t-sm">${r.timestamp || '—'}</td>
+          <td>
+            <div class="flex gap2">
+              <button class="btn btn-ghost btn-xs btn-icon" onclick="openEdit(${rowJson})" title="แก้ไข">✏️</button>
+              <button class="btn btn-danger btn-xs btn-icon" onclick="delRecord(${r.rowIndex})" title="ลบ">🗑</button>
+            </div>
+          </td>
+        </tr>`;
+      } catch(e) {
+        console.error('Error rendering row:', e, r);
+        return `<tr><td colspan="9" style="color:var(--red)">เกิดข้อผิดพลาดในการแสดงข้อมูล</td></tr>`;
+      }
+    }).join('') || '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--t2)">ยังไม่มีข้อมูล</td></tr>';
+  } else {
+    // ถ้าเป็นการโหลดเพิ่ม (reset=false) ให้เพิ่มแถวต่อท้าย
+    const newRows = rows.slice((historyPage - 1) * HISTORY_PAGE_SIZE);
+    tableBody.innerHTML += newRows.map(r => {
+      try {
+        const rowJson = JSON.stringify(r).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+        return `<tr>
+          <td>${r.date || '—'}</td>
+          <td>${r.sold || 0}</td>
+          <td>${r.pending || 0}</td>
+          <td>${r.cleared || 0}</td>
+          <td class="t-blue">${fmt(r.revenue || 0)}</td>
+          <td class="t-red">${fmt(r.expense || 0)}</td>
+          <td class="${(r.balance || 0) >= 0 ? 't-green' : 't-red'} t-bold">${fmt(r.balance || 0)}</td>
+          <td class="t-muted t-sm">${r.timestamp || '—'}</td>
+          <td>
+            <div class="flex gap2">
+              <button class="btn btn-ghost btn-xs btn-icon" onclick="openEdit(${rowJson})" title="แก้ไข">✏️</button>
+              <button class="btn btn-danger btn-xs btn-icon" onclick="delRecord(${r.rowIndex})" title="ลบ">🗑</button>
+            </div>
+          </td>
+        </tr>`;
+      } catch(e) {
+        console.error('Error rendering row:', e, r);
+        return `<tr><td colspan="9" style="color:var(--red)">เกิดข้อผิดพลาดในการแสดงข้อมูล</td></tr>`;
+      }
+    }).join('');
+  }
+  
+  // อัพเดท Pagination info และปุ่มโหลดเพิ่ม
+  updateHistoryPagination(sortedData.length);
+}
+
+function loadMoreHistory() {
+  historyPage++;
+  renderHistory(false);
+}
+
+function updateHistoryPagination(totalRecords) {
+  const currentShowing = Math.min(historyPage * HISTORY_PAGE_SIZE, totalRecords);
+  const container = document.getElementById('historyPagi');
+  
+  if (!container) {
+    console.error('Element #historyPagi not found');
+    return;
+  }
+  
+  container.innerHTML = `
+    <span class="pagi-info">กำลังแสดง ${currentShowing} จาก ${totalRecords} รายการ</span>
+    ${hasMoreHistory ? 
+      `<button class="btn btn-primary btn-sm" onclick="loadMoreHistory()">
+        📋 โหลดเพิ่มอีก ${Math.min(HISTORY_PAGE_SIZE, totalRecords - currentShowing)} รายการ
+      </button>` : 
+      '<span class="t-muted t-sm">✓ แสดงทั้งหมดแล้ว</span>'
+    }
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FORM
+// ═══════════════════════════════════════════════════════════════
+function calcPrev() {
+  const s=+v('f_sold')||0,pe=+v('f_pending')||0,cl=+v('f_cleared')||0;
+  const pi=+v('f_pipe')||0,sh=+v('f_share')||0,ot=+v('f_other')||0,sv=+v('f_save')||0;
+  const rev=(s+cl-pe)*PRICE, exp=pi+sh+ot+sv, bal=rev-exp;
+  set('p_rev',fmt(rev));set('p_exp',fmt(exp));set('p_bal',fmt(bal));
+  const el=document.getElementById('p_bal');
+  if(el) el.style.color=bal>=0?'var(--green)':'var(--red)';
+}
+
+function clearForm() {
+  ['f_sold','f_pending','f_cleared','f_pipe','f_share','f_other','f_save'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
+  setTodayDate(); calcPrev();
+}
+
+function submitForm() {
+  const date = v('f_date');
+  if(!date){toast('กรุณาระบุวันที่','err');return;}
+  const rec={date,sold:v('f_sold'),pending:v('f_pending'),cleared:v('f_cleared'),
+             pipeFee:v('f_pipe'),shareFee:v('f_share'),otherFee:v('f_other'),saveFee:v('f_save')};
+  showLoad('กำลังบันทึก...');
+  google.script.run
+    .withSuccessHandler(r=>{hideLoad();if(r.success){toast('บันทึกสำเร็จ ✓','ok');clearForm();loadData();}else toast('Error: '+r.error,'err');})
+    .withFailureHandler(e=>{hideLoad();toast(e.message,'err');})
+    .addRecord(rec);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EDIT MODAL
+// ═══════════════════════════════════════════════════════════════
+function openEdit(r) {
+  if (!r || !r.rowIndex) {
+    toast('ไม่พบข้อมูลที่ต้องการแก้ไข', 'err');
+    return;
+  }
+  document.getElementById('e_row').value=r.rowIndex;
+  document.getElementById('e_date').value=r.date || '';
+  document.getElementById('e_sold').value=r.sold || 0;
+  document.getElementById('e_pending').value=r.pending || 0;
+  document.getElementById('e_cleared').value=r.cleared || 0;
+  document.getElementById('e_pipe').value=r.pipeFee || 0;
+  document.getElementById('e_share').value=r.shareFee || 0;
+  document.getElementById('e_other').value=r.otherFee || 0;
+  document.getElementById('e_save').value=r.saveFee || 0;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('editModal').classList.remove('open')}
+
+function saveEdit(){
+  const row=parseInt(document.getElementById('e_row').value);
+  if (!row) {
+    toast('ไม่พบรายการที่ต้องการแก้ไข', 'err');
+    return;
+  }
+  const rec={date:v('e_date'),sold:v('e_sold'),pending:v('e_pending'),cleared:v('e_cleared'),
+             pipeFee:v('e_pipe'),shareFee:v('e_share'),otherFee:v('e_other'),saveFee:v('e_save')};
+  showLoad('กำลังอัพเดต...');
+  google.script.run
+    .withSuccessHandler(r=>{hideLoad();closeModal();if(r.success){toast('แก้ไขสำเร็จ ✓','ok');loadData();}else toast('Error: '+r.error,'err');})
+    .withFailureHandler(e=>{hideLoad();toast(e.message,'err');})
+    .updateRecord(row,rec);
+}
+
+function delRecord(rowIndex){
+  if(!confirm('ลบรายการนี้? การกระทำนี้ไม่สามารถเรียกคืนได้'))return;
+  showLoad('กำลังลบ...');
+  google.script.run
+    .withSuccessHandler(r=>{hideLoad();if(r.success){toast('ลบสำเร็จ','ok');loadData();}else toast('Error: '+r.error,'err');})
+    .withFailureHandler(e=>{hideLoad();toast(e.message,'err');})
+    .deleteRecord(rowIndex);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REPORT GENERATOR
+// ═══════════════════════════════════════════════════════════════
+function genReport(){
+  showLoad('กำลังสร้าง Analytics Report Sheet...');
+  google.script.run
+    .withSuccessHandler(r=>{
+      hideLoad();
+      if(r.success){
+        toast('สร้าง Report สำเร็จ! เปิด Google Sheets เพื่อดูผล','ok');
+        setTimeout(()=>window.open('https://docs.google.com/spreadsheets/d/11vhg37MbHRm53SSEHLsCI3EBXx5_meXVvlRuqhFteaY/edit','_blank'),800);
+      } else toast('Error: '+r.error,'err');
+    })
+    .withFailureHandler(e=>{hideLoad();toast(e.message,'err');})
+    .generateAnalyticsReport();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LINE OA FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function sendKpiReport() {
+  showLoad('กำลังส่ง KPI Report ไปยัง Line...');
+  google.script.run
+    .withSuccessHandler(r => {
+      hideLoad();
+      if (r.success) {
+        toast('✅ ส่ง KPI Report สำเร็จ! ตรวจสอบ Line', 'ok');
+      } else {
+        toast('❌ ' + (r.error || 'ส่งไม่สำเร็จ'), 'err');
+      }
+    })
+    .withFailureHandler(e => {
+      hideLoad();
+      toast('❌ Connection error: ' + e.message, 'err');
+    })
+    .sendKpiReportToLine();
+}
+
+function sendDeepAnalysis() {
+  showLoad('กำลังส่ง Deep Analysis ไปยัง Line...');
+  google.script.run
+    .withSuccessHandler(r => {
+      hideLoad();
+      if (r.success) {
+        toast('✅ ส่ง Deep Analysis สำเร็จ! ตรวจสอบ Line', 'ok');
+      } else {
+        toast('❌ ' + (r.error || 'ส่งไม่สำเร็จ'), 'err');
+      }
+    })
+    .withFailureHandler(e => {
+      hideLoad();
+      toast('❌ Connection error: ' + e.message, 'err');
+    })
+    .sendDeepAnalysisToLine();
+}
+
+function sendCustomLineMsg() {
+  document.getElementById('lineMsgModal').classList.add('open');
+}
+
+function closeLineMsgModal() {
+  document.getElementById('lineMsgModal').classList.remove('open');
+  document.getElementById('lineMsgText').value = '';
+}
+
+function sendLineMessage() {
+  const msg = document.getElementById('lineMsgText').value.trim();
+  if (!msg) {
+    toast('กรุณาพิมพ์ข้อความ', 'err');
+    return;
+  }
+  
+  showLoad('กำลังส่งข้อความ...');
+  google.script.run
+    .withSuccessHandler(r => {
+      hideLoad();
+      if (r.success) {
+        toast('✅ ส่งข้อความสำเร็จ!', 'ok');
+        closeLineMsgModal();
+      } else {
+        toast('❌ ' + (r.error || 'ส่งไม่สำเร็จ'), 'err');
+      }
+    })
+    .withFailureHandler(e => {
+      hideLoad();
+      toast('❌ Connection error: ' + e.message, 'err');
+    })
+    .sendCustomLineMessage(msg);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════
+function exportCSV(){
+  if(!filteredData.length){toast('ไม่มีข้อมูล','err');return;}
+  const h='date,sold,pending,cleared,revenue,expense,balance,pipeFee,shareFee,otherFee,saveFee';
+  const rows=filteredData.map(r=>`${r.date},${r.sold},${r.pending},${r.cleared},${r.revenue},${r.expense},${r.balance},${r.pipeFee},${r.shareFee},${r.otherFee},${r.saveFee}`);
+  dl([h,...rows].join('\n'),'sales-data.csv','text/csv');
+  toast('Export CSV สำเร็จ','ok');
+}
+function exportJSON(){
+  if(!filteredData.length){toast('ไม่มีข้อมูล','err');return;}
+  dl(JSON.stringify(filteredData,null,2),'sales-data.json','application/json');
+  toast('Export JSON สำเร็จ','ok');
+}
+function exportJPEG(){
+  const c=document.getElementById('cRevExp');
+  if(!c){toast('ไม่พบ chart','err');return;}
+  const a=document.createElement('a');
+  a.href=c.toDataURL('image/jpeg',.95);a.download='chart.jpg';a.click();
+  toast('Export JPEG สำเร็จ','ok');
+}
+function dl(content,name,mime){
+  const b=new Blob([content],{type:mime});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAV & UI
+// ═══════════════════════════════════════════════════════════════
+const NAV_TITLES = {
+  dashboard: 'Dashboard',
+  form: 'บันทึกข้อมูล',
+  history: 'ประวัติการบันทึก',
+  insights: 'Business Insights',
+  report: 'Report Generator',
+  lineconfig: 'Line OA Configuration',
+  commands: '🤖 Command Executor'
+};
+
+function nav(id, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = NAV_TITLES[id]||id;
+  if(id==='dashboard') renderDashboard();
+  if(id==='history')   {
+    renderHistory(true);
+    document.getElementById('historyCount').textContent = allData.length + ' รายการทั้งหมด';
+  }
+  if(id==='insights')  renderInsightsPanel();
+  // ปิด sidebar บนมือถือเมื่อเลือกเมนู
+  if (window.innerWidth <= 760) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+}
+
+function toggleSidebar(){
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar.style.width === '0px') {
+    sidebar.style.width = '220px';
+    sidebar.style.overflow = '';
+    document.getElementById('menuBtn').style.display = 'none';
+  } else if (window.innerWidth <= 760) {
+    sidebar.classList.toggle('open');
+  } else {
+    // Desktop toggle
+    if (sidebar.style.width === '0px' || sidebar.classList.contains('collapsed')) {
+      sidebar.style.width = '220px';
+      sidebar.style.overflow = '';
+      sidebar.classList.remove('collapsed');
+    } else {
+      sidebar.style.width = '0px';
+      sidebar.style.overflow = 'hidden';
+      sidebar.classList.add('collapsed');
+    }
+  }
+}
+
+function closeSidebar(){
+  const sidebar = document.getElementById('sidebar');
+  if (window.innerWidth <= 760) {
+    sidebar.classList.remove('open');
+  } else {
+    sidebar.style.width = '0px';
+    sidebar.style.overflow = 'hidden';
+    document.getElementById('menuBtn').style.display = '';
+  }
+}
+
+function switchDtab(id, el) {
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.dtab-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dtab-'+id).classList.add('active');
+}
+
+// ── Load/Toast helpers ─────────────────────────────────────────
+function showLoad(t){
+  document.getElementById('loadTxt').textContent=t||'กำลังโหลด...';
+  document.getElementById('loadOv').classList.add('show');
+}
+function hideLoad(){document.getElementById('loadOv').classList.remove('show');}
+
+let toastT;
+function toast(msg,type='info'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='show '+type;
+  clearTimeout(toastT);toastT=setTimeout(()=>el.className='',3200);
+}
+
+// ── Generic helpers ────────────────────────────────────────────
+const v  = id => document.getElementById(id)?.value || '';
+const set= (id,val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+const sum= (arr,k) => arr.reduce((s,r)=>s+(+r[k]||0),0);
+const fmt= n => '฿'+(+n||0).toLocaleString('th-TH',{maximumFractionDigits:0});
+const fmtS= n => { n=+n||0; if(Math.abs(n)>=1e6) return '฿'+(n/1e6).toFixed(1)+'M'; if(Math.abs(n)>=1e3) return '฿'+(n/1e3).toFixed(0)+'K'; return '฿'+n; };
+
+// Close modal on backdrop
+document.getElementById('editModal').addEventListener('click',e=>{ if(e.target===document.getElementById('editModal'))closeModal(); });
+document.getElementById('lineMsgModal').addEventListener('click',e=>{ if(e.target===document.getElementById('lineMsgModal'))closeLineMsgModal(); });
+
+// Responsive sidebar close on overlay
+window.addEventListener('click',e=>{
+  if(window.innerWidth<=760){
+    const sb=document.getElementById('sidebar');
+    if(sb.classList.contains('open')&&!sb.contains(e.target)&&e.target!==document.getElementById('menuBtn'))
+      sb.classList.remove('open');
+  }
+});
+  // ═══════════════════════════════════════════════════
+  // COMMAND EXECUTOR SYSTEM
+  // ═══════════════════════════════════════════════════
+  
+  // ─── All Commands Database ──────────────────────────
+  const ALL_COMMANDS = [
+    // Reports
+    { cmd: '/kpi', name: 'KPI Dashboard', emoji: '📊', category: 'report' },
+    { cmd: '/kpi2', name: 'Premium KPI', emoji: '🌟', category: 'report' },
+    { cmd: '/summary', name: 'Executive Summary', emoji: '📋', category: 'report' },
+    { cmd: '/today', name: 'รายงานวันนี้', emoji: '📅', category: 'report' },
+    { cmd: '/yesterday', name: 'รายงานเมื่อวาน', emoji: '📆', category: 'report' },
+    { cmd: '/week', name: 'รายงานสัปดาห์', emoji: '📈', category: 'report' },
+    { cmd: '/month', name: 'รายงานเดือน', emoji: '🗓', category: 'report' },
+    { cmd: '/d2', name: 'Dashboard V2', emoji: '📊', category: 'report' },
+    
+    // Analysis
+    { cmd: '/deep', name: 'Deep Analysis', emoji: '🧠', category: 'analysis' },
+    { cmd: '/forecast', name: 'พยากรณ์ 7 วัน', emoji: '🔮', category: 'analysis' },
+    { cmd: '/trend', name: 'แนวโน้มธุรกิจ', emoji: '📈', category: 'analysis' },
+    { cmd: '/compare', name: 'เปรียบเทียบ', emoji: '🔄', category: 'analysis' },
+    { cmd: '/seasonality', name: 'ฤดูกาล', emoji: '🌤️', category: 'analysis' },
+    { cmd: '/efficiency', name: 'ประสิทธิภาพ', emoji: '⚡', category: 'analysis' },
+    { cmd: '/benchmark', name: 'Benchmark', emoji: '📊', category: 'analysis' },
+    { cmd: '/growth', name: 'การเติบโต', emoji: '📈', category: 'analysis' },
+    
+    // Finance
+    { cmd: '/pl', name: 'งบกำไรขาดทุน', emoji: '📊', category: 'finance' },
+    { cmd: '/cashflow', name: 'กระแสเงินสด', emoji: '💵', category: 'finance' },
+    { cmd: '/breakeven', name: 'จุดคุ้มทุน', emoji: '🎯', category: 'finance' },
+    { cmd: '/roi', name: 'ROI', emoji: '💰', category: 'finance' },
+    { cmd: '/ratio', name: 'Financial Ratios', emoji: '📊', category: 'finance' },
+    { cmd: '/margin', name: 'Margin Analysis', emoji: '🎯', category: 'finance' },
+    { cmd: '/expense', name: 'ค่าใช้จ่าย', emoji: '💸', category: 'finance' },
+    { cmd: '/sales', name: 'ยอดขาย', emoji: '🛒', category: 'finance' },
+    { cmd: '/conversion', name: 'Conversion', emoji: '✅', category: 'finance' },
+    
+    // Risk
+    { cmd: '/risk', name: 'Risk Analysis', emoji: '⚠️', category: 'risk' },
+    { cmd: '/health', name: 'Health Score', emoji: '🏥', category: 'risk' },
+    { cmd: '/healthcard', name: 'Health Card', emoji: '💳', category: 'risk' },
+    { cmd: '/swot', name: 'SWOT Analysis', emoji: '💪', category: 'risk' },
+    { cmd: '/alert', name: 'Alert Config', emoji: '🚨', category: 'risk' },
+    
+    // Planning
+    { cmd: '/goal', name: 'Goal Tracking', emoji: '🎯', category: 'planning' },
+    { cmd: '/projection', name: 'Projection', emoji: '📊', category: 'planning' },
+    { cmd: '/invoice', name: 'Outstanding', emoji: '📋', category: 'planning' },
+    
+    // Other
+    { cmd: '/advice', name: 'คำแนะนำ AI', emoji: '🤖', category: 'other' },
+    { cmd: '/stats', name: 'สถิติ', emoji: '📊', category: 'other' },
+    { cmd: '/top 5', name: 'Top 5', emoji: '🏆', category: 'other' },
+    { cmd: '/bottom 5', name: 'Bottom 5', emoji: '⚠️', category: 'other' },
+    { cmd: '/latest 5', name: 'ล่าสุด 5', emoji: '📋', category: 'other' },
+    { cmd: '/latest 10', name: 'ล่าสุด 10', emoji: '📋', category: 'other' },
+    { cmd: '/search', name: 'ค้นหา', emoji: '🔍', category: 'other' },
+    { cmd: '/export csv', name: 'Export CSV', emoji: '📥', category: 'other' },
+    { cmd: '/export json', name: 'Export JSON', emoji: '📥', category: 'other' },
+    { cmd: '/quick', name: 'Quick Actions', emoji: '⚡', category: 'other' },
+    { cmd: '/help', name: 'วิธีใช้', emoji: '❓', category: 'other' },
+  ];
+  
+  // ─── Render Command Buttons ───────────────────────────
+  function renderCommands(filter = 'all') {
+    const grid = document.getElementById('commandGrid');
+    const filtered = filter === 'all' ?
+      ALL_COMMANDS :
+      ALL_COMMANDS.filter(c => c.category === filter);
+    
+    grid.innerHTML = filtered.map(c => `
+    <button class="cmd-btn" onclick="executeCmd('${c.cmd}')" title="${c.cmd}">
+      <span class="emoji">${c.emoji}</span>
+      <span>${c.name}</span>
+      <span style="margin-left:auto;font-size:0.625rem;color:#64748b;">${c.cmd}</span>
+    </button>
+  `).join('');
+  }
+  
+  // ─── Filter Commands ──────────────────────────────────
+  function filterCommands(category, btn) {
+    document.querySelectorAll('.cmd-category').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCommands(category);
+  }
+  
+  // ─── Execute Command ───────────────────────────────────
+  function executeCmd(cmd) {
+    const input = document.getElementById('cmdInput');
+    const resultDiv = document.getElementById('cmdResult');
+    
+    if (!cmd) {
+      cmd = input.value.trim();
+    }
+    
+    if (!cmd) {
+      showToast('⚠️ กรุณาพิมพ์คำสั่ง');
+      return;
+    }
+    
+    input.value = cmd;
+    resultDiv.innerHTML = '<div style="text-align:center;padding:2rem;">⏳ กำลังประมวลผล...</div>';
+    
+    google.script.run
+      .withSuccessHandler(function(response) {
+        let text = '';
+        
+        if (typeof response === 'string') {
+          text = response;
+        } else if (response && response.text) {
+          text = response.text;
+        } else if (response && response.altText) {
+          text = response.altText;
+        } else {
+          text = JSON.stringify(response, null, 2);
+        }
+        
+        resultDiv.innerHTML = formatCmdOutput(text);
+        resultDiv.scrollTop = 0;
+      })
+      .withFailureHandler(function(error) {
+        resultDiv.innerHTML = '<div style="color:#ef4444;text-align:center;padding:2rem;">❌ ' + error.message + '</div>';
+      })
+      .executeWebCommand(cmd);
+  }
+  
+  // ─── Generate Report ──────────────────────────────────
+  function generateReportFromWeb() {
+    const resultDiv = document.getElementById('cmdResult');
+    resultDiv.innerHTML = '<div style="text-align:center;padding:2rem;">📄 กำลังสร้างรายงาน...</div>';
+    
+    google.script.run
+      .withSuccessHandler(function(response) {
+        if (response && response.success) {
+          resultDiv.innerHTML = '<div style="text-align:center;padding:2rem;color:#10b981;">✅ ' + response.message + '<br><br>📊 เปิด Google Sheet เพื่อดูรายงาน</div>';
+          showToast('✅ รายงานถูกสร้างแล้ว!');
+        } else {
+          resultDiv.innerHTML = '<div style="color:#ef4444;">❌ ' + (response?.error || 'Unknown error') + '</div>';
+        }
+      })
+      .withFailureHandler(function(error) {
+        resultDiv.innerHTML = '<div style="color:#ef4444;">❌ ' + error.message + '</div>';
+      })
+      .generateAnalyticsReport();
+  }
+  
+  // ─── Format Output ────────────────────────────────────
+  function formatCmdOutput(text) {
+    if (!text) return '<div style="text-align:center;color:#64748b;">ไม่มีข้อมูล</div>';
+    
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#60a5fa;">$1</strong>')
+      .replace(/_(.*?)_/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>')
+      .replace(/✅/g, '<span style="color:#10b981;">✅</span>')
+      .replace(/❌/g, '<span style="color:#ef4444;">❌</span>')
+      .replace(/⚠️/g, '<span style="color:#f59e0b;">⚠️</span>')
+      .replace(/🟢/g, '<span style="color:#10b981;">🟢</span>')
+      .replace(/🔴/g, '<span style="color:#ef4444;">🔴</span>')
+      .replace(/🟡/g, '<span style="color:#f59e0b;">🟡</span>');
+  }
+  
+  // ─── Toast Notification ───────────────────────────────
+  function showToast(message) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+  
+  // ─── Keyboard Shortcut ────────────────────────────────
+  document.addEventListener('keydown', function(e) {
+    if (e.key === '/' && document.activeElement !== document.getElementById('cmdInput')) {
+      e.preventDefault();
+      document.getElementById('cmdInput').focus();
+    }
+  });
+  
+  // ─── Initialize ───────────────────────────────────────
+  renderCommands('all');
+</script>
+</body>
+</html>
